@@ -1,0 +1,24 @@
+<h1>Adedanha</h1>
+
+<form phx-submit="join">
+  <label>
+    <%= gettext("Apelido") %>
+    <input type="text" name="nickname">
+  </label>
+
+  <label>
+    <%= gettext("Id da sala") %>
+    <input type="text" name="room_id">
+  </label>
+
+  <button><%= gettext("Entrar") %></button>
+</form>
+
+<form phx-submit="create">
+  <label>
+    <%= gettext("Apelido") %>
+    <input type="text" name="nickname">
+  </label>
+
+  <button><%= gettext("Criar") %></button>
+</form>
