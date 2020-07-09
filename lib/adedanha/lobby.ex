@@ -7,6 +7,13 @@ defmodule Adedanha.Lobby do
 
   def create_room(first_player), do: GenServer.call(Lobby, {:create_room, first_player})
 
+  def get_room(id) do
+    case Map.get(rooms(), id) do
+      nil -> :error
+      pid -> {:ok, pid}
+    end
+  end
+
   def rooms(), do: GenServer.call(Lobby, :rooms)
 
   def init(_init_arg), do: {:ok, %{}}

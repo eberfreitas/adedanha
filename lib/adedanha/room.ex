@@ -1,6 +1,8 @@
 defmodule Adedanha.Room do
   use GenServer
 
+  import AdedanhaWeb.Gettext
+
   @state %{
     id: "",
     players: [],
@@ -26,7 +28,7 @@ defmodule Adedanha.Room do
 
   def get_state(pid), do: GenServer.call(pid, :get_state)
 
-  def add_player(pid, nickname), do: GenServer.call(pid, {:add_player, nickname})
+  def add_player(pid, nickname, owner \\ false), do: GenServer.call(pid, {:add_player, {nickname, owner}})
 
   def init(_init_arg) do
     state = @state |> Map.put(:id, HumanIDs.generate())
@@ -38,16 +40,20 @@ defmodule Adedanha.Room do
 
   def handle_call(:get_state, _from, state), do: {:reply, state, state}
 
-  def handle_call({:add_player, nickname}, _from, state) do
-    nickname = String.trim(nickname)
+  def handle_call({:add_player, {nickname, _owner} = player}, _from, state) do
+    players_nicknames =
+      state.players |> Enum.map(fn {n, _} -> n end)
 
     {players, result} =
-      state.players
-      |> Enum.member?(nickname)
-      |> if do
-        {state.players, {:error, "Nickname not available"}}
-      else
-        {state.players ++ [nickname], :ok}
+      cond do
+        Enum.member?(players_nicknames, nickname) ->
+          {state.players, {:error, gettext("Este apelido já está sendo usado.")}}
+
+        state.state != :waiting_players ->
+          {state.players, {:error, gettext("A sala não aceita mais jogadores.")}}
+
+        true ->
+          {state.players ++ [player], :ok}
       end
 
     {:reply, result, state |> Map.put(:players, players)}
