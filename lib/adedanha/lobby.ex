@@ -1,15 +1,17 @@
 defmodule Adedanha.Lobby do
   use GenServer
 
+  import AdedanhaWeb.Gettext
+
   alias Adedanha.Room
 
   def start_link(_opts), do: GenServer.start_link(__MODULE__, [], name: Lobby)
 
-  def create_room(first_player), do: GenServer.call(Lobby, {:create_room, first_player})
+  def create_room(), do: GenServer.call(Lobby, :create_room)
 
   def get_room(id) do
     case Map.get(rooms(), id) do
-      nil -> :error
+      nil -> {:error, gettext("A sala não existe ou o jogo já terminou! :(")}
       pid -> {:ok, pid}
     end
   end
@@ -18,7 +20,7 @@ defmodule Adedanha.Lobby do
 
   def init(_init_arg), do: {:ok, %{}}
 
-  def handle_call({:create_room, first_player}, _from, state) do
+  def handle_call(:create_room, _from, state) do
     room_pid =
       case Room.start_link() do
         {:ok, pid} -> pid
@@ -28,9 +30,7 @@ defmodule Adedanha.Lobby do
     state =
       case room_pid do
         nil -> state
-        pid ->
-          Room.add_player(pid, first_player)
-          state |> Map.put(Room.get_id(pid), room_pid)
+        pid -> state |> Map.put(Room.get_id(pid), room_pid)
       end
 
     {:reply, room_pid, state}

@@ -2,11 +2,6 @@
 
 <form phx-submit="join">
   <label>
-    <%= gettext("Apelido") %>
-    <input type="text" name="nickname">
-  </label>
-
-  <label>
     <%= gettext("Id da sala") %>
     <input type="text" name="room_id">
   </label>
@@ -14,11 +9,6 @@
   <button><%= gettext("Entrar") %></button>
 </form>
 
-<form phx-submit="create">
-  <label>
-    <%= gettext("Apelido") %>
-    <input type="text" name="nickname">
-  </label>
+<hr>
 
-  <button><%= gettext("Criar") %></button>
-</form>
+<button phx-click="create"><%= gettext("Criar nova sala") %></button>

@@ -18,7 +18,7 @@ defmodule AdedanhaWeb.Router do
     pipe_through :browser
 
     live "/", LobbyLive, :index
-    live "/room", RoomLive, :index
+    live "/room/:id", RoomLive, :index
   end
 
   # Other scopes may use custom stacks.

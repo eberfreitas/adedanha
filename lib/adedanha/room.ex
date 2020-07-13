@@ -6,6 +6,7 @@ defmodule Adedanha.Room do
   @state %{
     id: "",
     players: [],
+    max_players: 10,
     themes: [
       "Nome",
       "CEP",
@@ -27,6 +28,12 @@ defmodule Adedanha.Room do
   def get_id(pid), do: GenServer.call(pid, :get_id)
 
   def get_state(pid), do: GenServer.call(pid, :get_state)
+
+  def can_add_player?(pid) do
+    state = get_state(pid)
+
+    state.state == :waiting_players && (Enum.count(state.players) < state.max_players)
+  end
 
   def add_player(pid, nickname, owner \\ false), do: GenServer.call(pid, {:add_player, {nickname, owner}})
 
