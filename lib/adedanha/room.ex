@@ -3,6 +3,8 @@ defmodule Adedanha.Room do
 
   import AdedanhaWeb.Gettext
 
+  alias Phoenix.PubSub
+
   @state %{
     id: "",
     players: [],
@@ -32,10 +34,10 @@ defmodule Adedanha.Room do
   def can_add_player?(pid) do
     state = get_state(pid)
 
-    state.state == :waiting_players && (Enum.count(state.players) < state.max_players)
+    state.state == :waiting_players && Enum.count(state.players) < state.max_players
   end
 
-  def add_player(pid, nickname, owner \\ false), do: GenServer.call(pid, {:add_player, {nickname, owner}})
+  def add_player(pid, nickname, owner \\ false), do: GenServer.call(pid, {:add_player, nickname})
 
   def init(_init_arg) do
     state = @state |> Map.put(:id, HumanIDs.generate())
@@ -47,9 +49,9 @@ defmodule Adedanha.Room do
 
   def handle_call(:get_state, _from, state), do: {:reply, state, state}
 
-  def handle_call({:add_player, {nickname, _owner} = player}, _from, state) do
-    players_nicknames =
-      state.players |> Enum.map(fn {n, _} -> n end)
+  def handle_call({:add_player, nickname}, _from, state) do
+    players_nicknames = state.players |> Enum.map(fn {n, _} -> n end)
+    player = {nickname, Enum.empty?(state.players)}
 
     {players, result} =
       cond do
@@ -60,7 +62,9 @@ defmodule Adedanha.Room do
           {state.players, {:error, gettext("A sala não aceita mais jogadores.")}}
 
         true ->
-          {state.players ++ [player], :ok}
+          PubSub.broadcast(Adedanha.PubSub, "room:#{state.id}", :player_joined)
+
+          {state.players ++ [player], {:ok, player}}
       end
 
     {:reply, result, state |> Map.put(:players, players)}

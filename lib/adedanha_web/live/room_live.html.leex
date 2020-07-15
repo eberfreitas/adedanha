@@ -1,6 +1,6 @@
-<%= if @room_pid != nil do %>
-  <%= if @room.state == :waiting_players do %>
-    <%= live_component @socket, AdedanhaWeb.RoomLive.WaitingPlayers, room: @room, player: @player %>
+<%= if @id != nil do %>
+  <%= if @state.state == :waiting_players do %>
+    <%= live_component @socket, AdedanhaWeb.RoomLive.WaitingPlayers, state: @state, player: @player %>
   <% end %>
 <% end %>
 
